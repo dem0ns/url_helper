@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL参数编辑器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>URL参数编辑器</h1>
+            <p>直接编辑URL参数</p>
+        </div>
+        <div class="url-input-section">
+            <textarea class="url-input" id="urlInput" placeholder="请输入要解析的URL，例如：https://example.com/path?param1=value1&param2=value2" rows="3"></textarea>
+            <div class="url-input-actions">
+                <button class="action-btn clear" id="clearUrlBtn">清空</button>
+                <button class="action-btn" id="copyUrlBtn">一键复制</button>
+            </div>
+        </div>
+        <div class="replace-section">
+            <input type="text" class="replace-input" id="replaceFrom" placeholder="要替换的内容">
+            <input type="text" class="replace-input" id="replaceTo" placeholder="替换为">
+            <button class="action-btn" id="replaceBtn">批量替换参数值</button>
+        </div>
+        <div class="params-section">
+            <h2>参数列表</h2>
+            <div id="paramsList" class="params-list"></div>
+            <div class="add-param-section">
+                <div class="add-param-form">
+                    <input type="text" class="add-param-input" id="newParamName" placeholder="参数名">
+                    <input type="text" class="add-param-input" id="newParamValue" placeholder="参数值">
+                    <button class="param-btn add-btn" onclick="addNewParam()">添加参数</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
