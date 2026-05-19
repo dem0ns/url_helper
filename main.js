@@ -290,6 +290,7 @@ function parseURL(url) {
             currentParser.updateUrl(); // 强制同步URL输入框内容
         }
         updateParamsList();
+        generateQRCode(url);
     } catch (error) {
         document.getElementById('paramsList').innerHTML = '';
     }
@@ -311,17 +312,12 @@ urlInputElem.addEventListener('input', (e) => {
     }
 });
 
-// 粘贴时清空已有内容
-urlInputElem.addEventListener('paste', (e) => {
-    e.preventDefault();
-    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-    urlInputElem.value = pastedText;
-    urlInputElem.style.height = 'auto';
-    urlInputElem.style.height = urlInputElem.scrollHeight + 'px';
-    urlInputElem.focus();
-    if (pastedText.trim()) {
-        parseURL(pastedText.trim());
-    }
+// 粘贴后自动调整高度
+urlInputElem.addEventListener('paste', () => {
+    setTimeout(() => {
+        urlInputElem.style.height = 'auto';
+        urlInputElem.style.height = urlInputElem.scrollHeight + 'px';
+    }, 0);
 });
 window.addEventListener('load', () => {
     urlInputElem.focus();
@@ -391,33 +387,40 @@ openUrlBtn.addEventListener('click', () => {
 // 二维码生成
 let qrcodeContainer = null;
 
-function generateQRCode(url) {
-    if (!qrcodeContainer) {
-        qrcodeContainer = document.getElementById('qrcode');
+function generateQRCode(url, size, container) {
+    if (!container) {
+        if (!qrcodeContainer) {
+            qrcodeContainer = document.getElementById('qrcode');
+        }
+        container = qrcodeContainer;
     }
-    if (!qrcodeContainer) return;
-    qrcodeContainer.innerHTML = '';
+    if (!container) return;
+    container.innerHTML = '';
     if (!url) return;
 
-    try {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const qr = new QRCode(qrcodeContainer, {
-            text: url,
-            width: 128,
-            height: 128,
-            colorDark: isDark ? '#4fc3f7' : '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        // 库会自动调用makeImage()隐藏canvas显示img，需要反转
-        setTimeout(() => {
-            const canvas = qrcodeContainer.querySelector('canvas');
-            const img = qrcodeContainer.querySelector('img');
-            if (canvas) canvas.style.display = 'block';
-            if (img) img.style.display = 'none';
-        }, 10);
-    } catch(e) {
-        console.error('QR Code error:', e);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const levels = [QRCode.CorrectLevel.H, QRCode.CorrectLevel.M, QRCode.CorrectLevel.L, QRCode.CorrectLevel.Q];
+
+    for (const level of levels) {
+        try {
+            new QRCode(container, {
+                text: url,
+                width: size || 128,
+                height: size || 128,
+                colorDark: isDark ? '#4fc3f7' : '#000000',
+                colorLight: '#ffffff',
+                correctLevel: level
+            });
+            setTimeout(() => {
+                const canvas = container.querySelector('canvas');
+                const img = container.querySelector('img');
+                if (canvas) canvas.style.display = 'block';
+                if (img) img.style.display = 'none';
+            }, 10);
+            return;
+        } catch(e) {
+            container.innerHTML = '';
+        }
     }
 }
 
@@ -438,23 +441,7 @@ if (qrcodeClickTarget) {
         const url = urlInputElem.value.trim();
         if (!url) return;
 
-        qrcodeLarge.innerHTML = '';
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        new QRCode(qrcodeLarge, {
-            text: url,
-            width: 300,
-            height: 300,
-            colorDark: isDark ? '#4fc3f7' : '#000000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        setTimeout(() => {
-            const canvas = qrcodeLarge.querySelector('canvas');
-            const img = qrcodeLarge.querySelector('img');
-            if (canvas) canvas.style.display = 'block';
-            if (img) img.style.display = 'none';
-        }, 10);
-
+        generateQRCode(url, 300, qrcodeLarge);
         qrcodeModal.classList.add('show');
     });
 }
